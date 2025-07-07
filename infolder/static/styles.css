@@ -1,0 +1,28 @@
+/* Size for brand */
+nav .navbar-brand
+{
+    font-size: xx-large;
+    font-weight: 700;
+}
+
+/* Colors for brand */
+nav .navbar-brand .blue
+{
+    color: white;
+}
+nav .navbar-brand .red
+{
+    color: orange;
+}
+nav .navbar-brand .yellow
+{
+    color: orange;
+}
+nav .navbar-brand .green
+{
+    color: orange;
+}
+input::placeholder {
+    color: #fc310d ;
+    opacity: 1;
+}

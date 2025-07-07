@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+
+{% block title %}
+INDEX
+{% endblock %}
+
+{% block main %}
+
+<div id="myModal" class="modal fade" tabindex="-1">
+<div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">Welcome!</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <p>Welcome to the index page! Here you can trade to your heart's content with us by your side!<span class="badge"></p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <!--this closes, see what ull do -->
+        <button type="button" class="btn btn-primary">Move On</button>
+            <!--Here make sure to impplement the next fuinctionality. Look at changing the color of the popover. Also add some popovers.-->
+    </div>
+    </div>
+</div>
+</div>
+
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th style ="color:black"><a href="#" data-toggle="tooltip" title="Represents the Stock Ticker!">Symbol</a>
+
+                <!-- Generated markup by the plugin -->
+                <div class="tooltip bs-tooltip-top" role="tooltip">
+                  <div class="arrow"></div>
+                  <div class="tooltip-inner">
+                    Some tooltip text!
+                  </div>
+                </div>
+                </th>
+            <th style ="color:white">Name</th>
+            <th style ="color:black"><a href="#" data-toggle="tooltip" title="Number of owned shares!">Shares</a></th>
+            <th style ="color:white">Price</th>
+            <th style ="color:white">Sum</th>
+        </tr>
+    <tbody>
+        {% for stock in stocks %}
+        <tr class="table-secondary">
+          <td style ="color:black">{{stock.symbol}}</td>
+          <td style ="color:black">{{stock.name}}</td>
+          <td style ="color:black">{{stock.shares}}</td>
+          <td style ="color:black">{{stock.price | usd}}</td>
+          <td style ="color:black">{{stock.total | usd}}</td>
+        </tr>
+        {% endfor %}
+        <tr class="table-secondary">
+            <td style ="color:black"><a href="#" data-toggle="tooltip" title="Represents the Stock Ticker!">CASH</a></td>
+            <td colspan ="3"></td>
+            <td style ="color:black"> {{cash | usd}}</td>
+        </tr>
+
+    </tbody>
+    </thead>
+    <tfoot class="table-primary">
+        <td style ="color:red">Initial Cash</td>
+        <td colspan ="3"></td>
+        <td style ="color:red">{{ total_cash | usd }} </td>
+
+    </tfoot>
+</table>
+{% endblock %}

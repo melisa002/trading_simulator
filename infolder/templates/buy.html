@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block title %}
+BUY
+{% endblock %}
+
+{% block main %}
+<h4 style="color:white">Enter the <a href="#" data-toggle="tooltip" title="A code that represents a publicly traded company.">ticker</a> for a stock you are interested in.</h4>
+<br>
+<h6 style="color:white; font-weight:200;">Scroll down for a table showing some popular companies and their stock tickers.</h6>
+<br>
+    <form action = "/buy" method="POST">
+        <div class="form-group">
+            <input autocomplete="off" name="symbol" type="text" class="form-control" placeholder="Stock Ticker" >
+        </div>
+        <br>
+        <div class="form-group">
+            <input class="form-control" name ="shares" placeholder="Shares" type="text">
+        </div>
+        <br>
+        <button class="btn btn-primary" type="submit">Buy</button>
+    </form>
+
+    <br>
+    <br>
+
+    <table class="table table-striped" style="width:60%" align="center">
+        <thead class="thead-dark">
+            <tr>
+                <th style="color:white">Company Name</th>
+                <th style="color:white">Ticker</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+              <td style="color:white">Apple</td>
+              <td style="color:white">AAPL</td>
+            </tr>
+            <tr>
+                <td style="color:white">Tesla</td>
+                <td style="color:white">TSLA</td>
+            </tr>
+            <tr>
+                <td style="color:white">Microsoft</td>
+                <td style="color:white">MSFT</td>
+            </tr>
+            <tr>
+                <td style="color:white">Johnson and Johnson</td>
+                <td style="color:white">JNJ</td>
+            </tr>
+            <tr>
+                <td style="color:white">Amazon</td>
+                <td style="color:white">AMZN</td>
+            </tr>
+            <tr>
+                <td style="color:white">Visa</td>
+                <td style="color:white">V</td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
+    <h6 style="color:white; font-weight:200;">Keep in mind that these are not the only tickers that exist. Googling any publicly traded company will give you the its stock ticker.</h6>
+
+{% endblock %}

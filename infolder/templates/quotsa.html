@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Quotsa
+{% endblock %}
+
+{% block main %}
+
+    {% if stock %}
+        <h4 style="color:white;">
+            A share of {{ stock.name}} ({{ stock.symbol }}) costs {{ stock.price | usd }}</h4>
+        <br>
+        <p style="color:white; font-weight:200">Interested in more information about the history of the stock price?
+            We always encourage you to consult historical data when it comes to making a financial decision.
+            Click the button below to see the Graph of {{stock.name}} ({{stock.symbol}}) Stock Price over time.
+        </p>
+        <br>
+
+        </form>
+        <form action="/plot", method="post">
+            <button class="btn btn-primary" href="plot.html">Price Graph</button>
+        </form>
+        <br>
+        <form action="/site", method="post">
+            <button class="btn btn-primary" href="site.html">Further Yahoo Finance Information</button>
+        </form>
+        <br>
+        <br>
+        <p style="color:white; font-weight:200">Yahoo Finance is one of the most useful tools to utilize when it comes to analyzing financial data of a publicly traded
+            company before making a decision to invest or not. We highly incourage you to use the platform and study the financial aspects presented in Yahoo Finance.
+        </p>
+    {% else %}
+        <form action="/quote", method="post">
+            <div class="form-group">
+                <input autocomplete="off" autofocus required class="form-control" name="symbol" placeholder="Symbol" type="text">
+            </div>
+            <button class="btn btn-primary" type="submit">Quote</button>
+        </form>
+
+
+    {% endif %}
+{% endblock %}
+
+
+

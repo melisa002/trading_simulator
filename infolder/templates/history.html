@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}
+TRANSACTIONS
+{% endblock %}
+
+{% block main %}
+<h6 style="color:white; font-weight:200;">This page displays the history of the transactions you have completed in this simulation. You can use this page to reflect on your financial decisions and outcomes.</h6>
+<br>
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Symbol</th>
+            <th>Type</th>
+            <th>Shares</th>
+            <th>Price</th>
+            <th>Time</th>
+        </tr>
+    <tbody>
+        {% for transaction in transactions %}
+        <tr>
+          <td style="color:white">{{transaction.symbol.upper()}}</td>
+          <td style="color:white">{{transaction.type}}</td>
+          <td style="color:white">{{transaction.shares}}</td>
+          <td style="color:white">{{transaction.price | usd}}</td>
+          <td style="color:white">{{transaction.time}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    </thead>
+{% endblock %}
