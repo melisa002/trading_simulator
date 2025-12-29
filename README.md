@@ -39,8 +39,5 @@ I wish to keep working on this project and I want to add more functionalities in
 - a modal was created to welcome newcomers. This is done by using javascript to only show the modal once per user, as soon as they log in after registering.
 - The site shows the yahoo finance page for every stock by grabbing the stock ticker from the input in quotes and formatting it inside a strandard yahoo finance url. This makes it possible to generate the yahoo finance page for every stock.
 
-#### How to run:
-The simulation uses data imported from IEX cloud so in order to run the simulation, an **API key** is required. This is the API Key: **export API_KEY=pk_616d5fa36b974a60bbdfbfe63df0f332**
-
 ##### That is all !!
 
