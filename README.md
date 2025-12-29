@@ -41,3 +41,4 @@ I wish to keep working on this project and I want to add more functionalities in
 
 ##### That is all !!
 
+# algorithmic_trading
