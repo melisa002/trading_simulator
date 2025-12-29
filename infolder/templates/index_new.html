@@ -1,0 +1,429 @@
+{% extends "layout_new.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block main %}
+<div class="fade-in">
+    <!-- Page Header -->
+    <div style="margin: 1.5rem 0;">
+        <h1 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem;">
+            Dashboard
+        </h1>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+            Portfolio overview and performance
+        </p>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-grid">
+        <div class="stat-card {% if total_cash >= 10000 %}positive{% elif total_cash < 9500 %}negative{% endif %}">
+            <div class="stat-label">
+                <i class="fas fa-wallet"></i> Total Value
+            </div>
+            <div class="stat-value">${{ "%.2f"|format(total_cash) }}</div>
+            <div class="stat-change {% if total_cash >= 10000 %}positive{% else %}negative{% endif %}">
+                {% if total_cash >= 10000 %}
+                <i class="fas fa-arrow-up"></i> +${{ "%.2f"|format(total_cash - 10000) }}
+                {% else %}
+                <i class="fas fa-arrow-down"></i> -${{ "%.2f"|format(10000 - total_cash) }}
+                {% endif %}
+                ({{ "%.2f"|format(((total_cash - 10000) / 10000) * 100) }}%)
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                <i class="fas fa-money-bill-wave"></i> Cash Available
+            </div>
+            <div class="stat-value">${{ "%.2f"|format(cash) }}</div>
+            <div class="stat-change">
+                {{ "%.1f"|format((cash / total_cash) * 100) }}% of portfolio
+            </div>
+        </div>
+
+        <div class="stat-card {% if total_cash - cash > 0 %}positive{% endif %}">
+            <div class="stat-label">
+                <i class="fas fa-chart-pie"></i> Stock Holdings
+            </div>
+            <div class="stat-value">${{ "%.2f"|format(total_cash - cash) }}</div>
+            <div class="stat-change">
+                {{ "%.1f"|format(((total_cash - cash) / total_cash) * 100) }}% invested
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                <i class="fas fa-briefcase"></i> Total Stocks
+            </div>
+            <div class="stat-value">{{ stocks|length if stocks else 0 }}</div>
+            <div class="stat-change">
+                Active positions
+            </div>
+        </div>
+    </div>
+
+    <!-- Portfolio Performance Chart -->
+    {% if stocks %}
+    <div class="chart-container">
+        <div class="card-header">
+            <i class="fas fa-chart-area"></i> Portfolio Performance (Last 30 Days)
+        </div>
+        <div style="padding: 0.75rem; background: var(--bg-dark); border-radius: 4px; margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-secondary);">
+            <i class="fas fa-info-circle"></i> This chart shows your portfolio's weighted performance based on your actual holdings
+        </div>
+        <canvas id="portfolioChart" style="max-height: 400px; display: none;"></canvas>
+        <div id="loadingPortfolio" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+            <i class="fas fa-spinner fa-spin"></i> Loading portfolio performance...
+        </div>
+    </div>
+
+    <!-- Portfolio Sector Breakdown -->
+    <div class="chart-container">
+        <div class="card-header">
+            <i class="fas fa-chart-pie"></i> Portfolio by Sector
+        </div>
+        <div style="padding: 0.75rem; background: var(--bg-dark); border-radius: 4px; margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-secondary);">
+            <i class="fas fa-info-circle"></i> See how your investments are distributed across different sectors
+        </div>
+        <canvas id="sectorChart" style="max-height: 350px; display: none;"></canvas>
+        <div id="loadingSectors" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+            <i class="fas fa-spinner fa-spin"></i> Loading sector breakdown...
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Current Holdings -->
+    {% if stocks %}
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-list"></i> Your Holdings
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Company</th>
+                        <th>Shares</th>
+                        <th>Price</th>
+                        <th>Total Value</th>
+                        <th>% of Portfolio</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in stocks %}
+                    {% if stock.shares > 0 %}
+                    <tr>
+                        <td><strong>{{ stock.symbol }}</strong></td>
+                        <td>{{ stock.name }}</td>
+                        <td>{{ stock.shares }}</td>
+                        <td class="price-up">${{ "%.2f"|format(stock.price) }}</td>
+                        <td><strong>${{ "%.2f"|format(stock.total) }}</strong></td>
+                        <td>
+                            <div class="badge badge-info">
+                                {{ "%.1f"|format((stock.total / total_cash) * 100) }}%
+                            </div>
+                        </td>
+                        <td>
+                            <a href="/quote?symbol={{ stock.symbol }}" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                <i class="fas fa-chart-line"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 3rem;">
+        <div style="font-size: 4rem; color: var(--text-secondary); margin-bottom: 1rem;">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <h2 style="margin-bottom: 1rem;">Start Your Trading Journey</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+            You don't have any stocks yet. Search for a company and make your first trade!
+        </p>
+        <div>
+            <a href="/quote" class="btn btn-primary" style="margin-right: 1rem;">
+                <i class="fas fa-search"></i> Search Stocks
+            </a>
+            <a href="/learn" class="btn btn-success">
+                <i class="fas fa-graduation-cap"></i> Learn Trading Basics
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Trading Tips Card -->
+    <div class="card education-card">
+        <div class="card-header">
+            <i class="fas fa-lightbulb"></i> Daily Trading Tip
+        </div>
+        <p style="font-size: 1.125rem; line-height: 1.8; margin-top: 1rem;">
+            <strong>Diversification is Key:</strong> Don't put all your eggs in one basket!
+            A well-diversified portfolio typically holds <span class="concept-highlight">5-10 different stocks</span>
+            across various sectors. This helps minimize risk if one company underperforms.
+        </p>
+        <div style="margin-top: 1rem;">
+            <a href="/learn" class="btn btn-primary">
+                <i class="fas fa-book-open"></i> Learn More Trading Strategies
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+{% if stocks %}
+// Portfolio Performance Chart
+const ctx = document.getElementById('portfolioChart');
+if (ctx) {
+    let portfolioChart = new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Portfolio Return (%)',
+                data: [],
+                borderColor: '#4a9d7e',
+                backgroundColor: 'rgba(74, 157, 126, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3,
+                pointRadius: 3,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#4a9d7e',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(10, 14, 20, 0.95)',
+                    padding: 10,
+                    titleColor: '#d4d7dc',
+                    bodyColor: '#d4d7dc',
+                    borderColor: '#1e2329',
+                    borderWidth: 1,
+                    displayColors: false,
+                    titleFont: { size: 11 },
+                    bodyFont: { size: 11 },
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed.y;
+                            const sign = value >= 0 ? '+' : '';
+                            return 'Return: ' + sign + value.toFixed(2) + '%';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    grid: {
+                        color: 'rgba(30, 35, 41, 0.5)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: '#8a8f98',
+                        font: { size: 10 },
+                        callback: function(value) {
+                            return (value >= 0 ? '+' : '') + value.toFixed(1) + '%';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#8a8f98',
+                        font: { size: 10 },
+                        maxTicksLimit: 10
+                    }
+                }
+            }
+        }
+    });
+
+    // Load real portfolio performance data
+    async function loadPortfolioPerformance() {
+        try {
+            const response = await fetch('/api/portfolio-performance');
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch portfolio performance');
+            }
+
+            const data = await response.json();
+            console.log('Portfolio performance data:', data);
+
+            if (data.error) {
+                console.log('Portfolio error:', data.error);
+                document.getElementById('loadingPortfolio').innerHTML =
+                    '<div style="color: var(--text-secondary);"><i class="fas fa-info-circle"></i> ' + data.error + '</div>';
+                return;
+            }
+
+            if (!data.labels || data.labels.length === 0) {
+                document.getElementById('loadingPortfolio').innerHTML =
+                    '<div style="color: var(--text-secondary);"><i class="fas fa-info-circle"></i> Not enough data yet. Make some trades!</div>';
+                return;
+            }
+
+            // Update chart
+            portfolioChart.data.labels = data.labels;
+            portfolioChart.data.datasets[0].data = data.values;
+
+            // Color the line based on overall performance
+            const lastValue = data.values[data.values.length - 1];
+            if (lastValue >= 0) {
+                portfolioChart.data.datasets[0].borderColor = '#4a9d7e';
+                portfolioChart.data.datasets[0].backgroundColor = 'rgba(74, 157, 126, 0.1)';
+                portfolioChart.data.datasets[0].pointBackgroundColor = '#4a9d7e';
+            } else {
+                portfolioChart.data.datasets[0].borderColor = '#c74a4a';
+                portfolioChart.data.datasets[0].backgroundColor = 'rgba(199, 74, 74, 0.1)';
+                portfolioChart.data.datasets[0].pointBackgroundColor = '#c74a4a';
+            }
+
+            portfolioChart.update();
+            document.getElementById('loadingPortfolio').style.display = 'none';
+            ctx.style.display = 'block';
+
+        } catch (error) {
+            console.error('Error loading portfolio performance:', error);
+            document.getElementById('loadingPortfolio').innerHTML =
+                '<div style="color: var(--danger-red);"><i class="fas fa-exclamation-circle"></i> Error loading performance data</div>';
+        }
+    }
+
+    // Load on page load
+    window.addEventListener('load', function() {
+        loadPortfolioPerformance();
+    });
+}
+
+// Sector Pie Chart
+const sectorCtx = document.getElementById('sectorChart');
+if (sectorCtx) {
+    let sectorChart = new Chart(sectorCtx.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: [],
+            datasets: [{
+                data: [],
+                backgroundColor: [
+                    '#4a9d7e',  // Green
+                    '#3b82f6',  // Blue
+                    '#8b5cf6',  // Purple
+                    '#f59e0b',  // Orange
+                    '#ef4444',  // Red
+                    '#10b981',  // Emerald
+                    '#06b6d4',  // Cyan
+                    '#f97316',  // Dark Orange
+                    '#ec4899',  // Pink
+                    '#6366f1'   // Indigo
+                ],
+                borderColor: '#0a0e14',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        color: '#d4d7dc',
+                        font: { size: 11 },
+                        padding: 12,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(10, 14, 20, 0.95)',
+                    padding: 10,
+                    titleColor: '#d4d7dc',
+                    bodyColor: '#d4d7dc',
+                    borderColor: '#1e2329',
+                    borderWidth: 1,
+                    titleFont: { size: 11 },
+                    bodyFont: { size: 11 },
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return label + ': $' + value.toFixed(2) + ' (' + percentage + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Load sector data
+    async function loadSectorBreakdown() {
+        try {
+            const response = await fetch('/api/portfolio-sectors');
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch sector breakdown');
+            }
+
+            const data = await response.json();
+            console.log('Sector data:', data);
+
+            if (data.error) {
+                console.log('Sector error:', data.error);
+                document.getElementById('loadingSectors').innerHTML =
+                    '<div style="color: var(--text-secondary);"><i class="fas fa-info-circle"></i> ' + data.error + '</div>';
+                return;
+            }
+
+            if (!data.labels || data.labels.length === 0) {
+                document.getElementById('loadingSectors').innerHTML =
+                    '<div style="color: var(--text-secondary);"><i class="fas fa-info-circle"></i> No holdings to display</div>';
+                return;
+            }
+
+            // Update chart
+            sectorChart.data.labels = data.labels;
+            sectorChart.data.datasets[0].data = data.values;
+            sectorChart.update();
+
+            document.getElementById('loadingSectors').style.display = 'none';
+            sectorCtx.style.display = 'block';
+
+        } catch (error) {
+            console.error('Error loading sector breakdown:', error);
+            document.getElementById('loadingSectors').innerHTML =
+                '<div style="color: var(--danger-red);"><i class="fas fa-exclamation-circle"></i> Error loading sector data</div>';
+        }
+    }
+
+    // Load on page load
+    window.addEventListener('load', function() {
+        loadSectorBreakdown();
+    });
+}
+{% endif %}
+</script>
+{% endblock %}

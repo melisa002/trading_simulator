@@ -1,6 +1,5 @@
 import os
-import requests
-import urllib.parse
+import yfinance as yf
 
 from flask import redirect, render_template, request, session
 from functools import wraps
@@ -50,26 +49,31 @@ def login_required(f):
 
 
 def lookup(symbol):
-    """Look up quote for symbol."""
+    """Look up quote for symbol using yfinance (free!)"""
 
-    # Contact API
     try:
-        api_key = os.environ.get("API_KEY")
-        url = f"https://cloud.iexapis.com/stable/stock/{urllib.parse.quote_plus(symbol)}/quote?token={api_key}"
-        response = requests.get(url)
-        response.raise_for_status()
-    except requests.RequestException:
-        return None
+        # Get stock info from yfinance
+        stock = yf.Ticker(symbol.upper())
 
-    # Parse response
-    try:
-        quote = response.json()
+        # Get current price and company info
+        info = stock.info
+
+        # Try to get current price from multiple sources
+        price = info.get('currentPrice') or info.get('regularMarketPrice') or info.get('previousClose')
+
+        if price is None:
+            return None
+
+        # Get company name
+        name = info.get('longName') or info.get('shortName') or symbol.upper()
+
         return {
-            "name": quote["companyName"],
-            "price": float(quote["latestPrice"]),
-            "symbol": quote["symbol"]
+            "name": name,
+            "price": float(price),
+            "symbol": symbol.upper()
         }
-    except (KeyError, TypeError, ValueError):
+    except Exception as e:
+        # Return None if there's any error (invalid symbol, network issue, etc.)
         return None
 
 

@@ -1,0 +1,873 @@
+{% extends "layout_new.html" %}
+
+{% block title %}{{ stock.symbol }} - Stock Quote{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js Financial Plugin for Candlesticks (v0.2.0 for Chart.js v3) -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/dist/chartjs-chart-financial.min.js"></script>
+{% endblock %}
+
+{% block main %}
+<div class="fade-in">
+    <!-- Stock Header -->
+    <div style="margin: 1.5rem 0;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1 style="font-size: 1.75rem; font-weight: 600; margin-bottom: 0.25rem;">
+                    {{ stock.symbol }}
+                </h1>
+                <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                    {{ stock.name }}
+                </p>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 2rem; font-weight: 600; color: var(--success-green); font-family: var(--font-mono);">
+                    ${{ "%.2f"|format(stock.price) }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                    Real-time
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unrealized P&L Card -->
+    <div id="plCard" style="display: none; margin-bottom: 1.5rem;">
+        <div class="card" style="border-left: 4px solid var(--primary-blue);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
+                        Your Position
+                    </div>
+                    <div style="font-size: 1.25rem; font-weight: 600;">
+                        <span id="totalShares">0</span> shares @ $<span id="avgPrice">0</span>
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                        Cost: $<span id="totalCost">0</span> → Value: $<span id="totalValue">0</span>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
+                        Total Unrealized P&L
+                    </div>
+                    <div id="plAmount" style="font-size: 1.75rem; font-weight: 700; font-family: var(--font-mono);">
+                        $0.00
+                    </div>
+                    <div id="plPercent" style="font-size: 0.9rem; font-weight: 600; margin-top: 0.25rem;">
+                        (0.00%)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Individual Trades Breakdown -->
+            <div id="tradesBreakdown" style="display: none;">
+                <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 0.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <div style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">
+                            <i class="fas fa-receipt"></i> Individual Trades
+                        </div>
+                        <button onclick="toggleTradesBreakdown()" class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">
+                            <i class="fas fa-chevron-up"></i> Hide
+                        </button>
+                    </div>
+                    <div id="tradesList" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                </div>
+            </div>
+
+            <button id="showTradesBtn" onclick="toggleTradesBreakdown()" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem; margin-top: 0.75rem; width: 100%;">
+                <i class="fas fa-chevron-down"></i> View Individual Trades
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <a href="/buy?symbol={{ stock.symbol }}" class="btn btn-success" style="flex: 1; min-width: 200px;">
+            <i class="fas fa-shopping-cart"></i> Buy {{ stock.symbol }}
+        </a>
+        <a href="/sell?symbol={{ stock.symbol }}" class="btn btn-danger" style="flex: 1; min-width: 200px;">
+            <i class="fas fa-hand-holding-usd"></i> Sell {{ stock.symbol }}
+        </a>
+        <a href="/quote" class="btn btn-primary" style="flex: 1; min-width: 200px;">
+            <i class="fas fa-search"></i> Search Another
+        </a>
+    </div>
+
+    <!-- Stock Price Chart -->
+    <div class="chart-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div class="card-header" style="margin-bottom: 0;">
+                <i class="fas fa-chart-line"></i> {{ stock.symbol }} Price History
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="chart-btn" onclick="setChartType('line')" id="btn-line">Line</button>
+                <button class="chart-btn active" onclick="setChartType('candlestick')" id="btn-candlestick">Candlestick</button>
+            </div>
+        </div>
+        <div id="purchaseMarkerInfo" style="display: none; background: var(--bg-dark); padding: 0.5rem; border-radius: 4px; margin-bottom: 0.75rem; font-size: 0.8rem; border-left: 3px solid var(--primary-blue);">
+            <i class="fas fa-info-circle"></i> <span id="purchaseMarkerText"></span>
+        </div>
+        <div class="chart-controls">
+            <button class="chart-btn active" onclick="updateStockChart('1D')" id="btn-1D">1 Day</button>
+            <button class="chart-btn" onclick="updateStockChart('5D')" id="btn-5D">5 Days</button>
+            <button class="chart-btn" onclick="updateStockChart('1M')" id="btn-1M">1 Month</button>
+            <button class="chart-btn" onclick="updateStockChart('3M')" id="btn-3M">3 Months</button>
+            <button class="chart-btn" onclick="updateStockChart('6M')" id="btn-6M">6 Months</button>
+            <button class="chart-btn" onclick="updateStockChart('1Y')" id="btn-1Y">1 Year</button>
+            <button class="chart-btn" onclick="updateStockChart('5Y')" id="btn-5Y">5 Years</button>
+            <button class="chart-btn" onclick="updateStockChart('MAX')" id="btn-MAX">All Time</button>
+        </div>
+        <canvas id="stockChart" style="max-height: 500px;"></canvas>
+        <div id="loadingSpinner" class="spinner" style="display: none;"></div>
+    </div>
+
+    <!-- News Section -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-newspaper"></i> Latest News for {{ stock.symbol }}
+        </div>
+        <div id="newsContainer" style="margin-top: 1rem;">
+            <div style="text-align: center; color: var(--text-secondary); padding: 1rem;">
+                Loading news...
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">
+                <i class="fas fa-dollar-sign"></i> Current Price
+            </div>
+            <div class="stat-value">${{ "%.2f"|format(stock.price) }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                <i class="fas fa-chart-line"></i> Symbol
+            </div>
+            <div class="stat-value" style="font-size: 1.5rem;">{{ stock.symbol }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                <i class="fas fa-building"></i> Company
+            </div>
+            <div class="stat-value" style="font-size: 1rem; word-break: break-word;">{{ stock.name }}</div>
+        </div>
+
+        <div class="stat-card positive">
+            <div class="stat-label">
+                <i class="fas fa-external-link-alt"></i> Market Info
+            </div>
+            <div style="margin-top: 0.5rem;">
+                <a href="https://finance.yahoo.com/quote/{{ stock.symbol }}"
+                   target="_blank"
+                   class="btn btn-primary"
+                   style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                    <i class="fas fa-chart-bar"></i> View on Yahoo Finance
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trading Opportunity Analysis -->
+    <div class="card education-card">
+        <div class="card-header">
+            <i class="fas fa-brain"></i> Investment Analysis
+        </div>
+        <div style="margin-top: 1rem;">
+            <h3 style="margin-bottom: 1rem; font-size: 1.25rem;">
+                <i class="fas fa-lightbulb"></i> Things to Consider Before Trading {{ stock.symbol }}
+            </h3>
+            <ul style="list-style: none; padding: 0;">
+                <li style="padding: 0.75rem; background: var(--bg-dark); border-radius: 0.5rem; margin-bottom: 0.75rem;">
+                    <i class="fas fa-check-circle" style="color: var(--success-green);"></i>
+                    <strong>Trend Analysis:</strong> Check if the stock is in an uptrend or downtrend over different time periods
+                </li>
+                <li style="padding: 0.75rem; background: var(--bg-dark); border-radius: 0.5rem; margin-bottom: 0.75rem;">
+                    <i class="fas fa-check-circle" style="color: var(--success-green);"></i>
+                    <strong>Diversification:</strong> Don't invest all your money in one stock
+                </li>
+                <li style="padding: 0.75rem; background: var(--bg-dark); border-radius: 0.5rem; margin-bottom: 0.75rem;">
+                    <i class="fas fa-check-circle" style="color: var(--success-green);"></i>
+                    <strong>Risk Management:</strong> Only invest what you can afford to lose
+                </li>
+                <li style="padding: 0.75rem; background: var(--bg-dark); border-radius: 0.5rem; margin-bottom: 0.75rem;">
+                    <i class="fas fa-check-circle" style="color: var(--success-green);"></i>
+                    <strong>Research:</strong> Learn about the company's business model and financials
+                </li>
+            </ul>
+            <div style="margin-top: 1.5rem;">
+                <a href="/learn" class="btn btn-primary">
+                    <i class="fas fa-graduation-cap"></i> Learn More Trading Strategies
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const stockSymbol = "{{ stock.symbol }}";
+const currentPrice = {{ stock.price }};
+let currentPeriod = '1D';
+let currentChartType = 'candlestick';
+let chartData = null;
+let userTrades = null;
+let holdingsData = null;
+
+// Fetch user's trades for this stock
+async function loadUserTrades() {
+    try {
+        const response = await fetch(`/api/user-trades/${stockSymbol}`);
+
+        if (!response.ok) {
+            console.log('No trades found or error fetching trades');
+            return;
+        }
+
+        const data = await response.json();
+        console.log('User trades data:', data);
+
+        if (data.error) {
+            console.log('Error in trades:', data.error);
+            return;
+        }
+
+        userTrades = data.trades || [];
+        holdingsData = data.holdings;
+
+        // Display unrealized P&L if user has holdings
+        if (holdingsData && holdingsData.shares_from_purchases > 0) {
+            document.getElementById('plCard').style.display = 'block';
+            document.getElementById('totalShares').textContent = holdingsData.shares_from_purchases.toFixed(0);
+            document.getElementById('avgPrice').textContent = holdingsData.avg_price.toFixed(2);
+            document.getElementById('totalCost').textContent = holdingsData.total_cost.toFixed(2);
+            document.getElementById('totalValue').textContent = holdingsData.total_current_value.toFixed(2);
+
+            const plAmount = holdingsData.unrealized_pl;
+            const plPct = holdingsData.unrealized_pl_pct;
+
+            // Color based on profit/loss
+            const color = plAmount >= 0 ? 'var(--success-green)' : 'var(--danger-red)';
+            const sign = plAmount >= 0 ? '+' : '';
+
+            document.getElementById('plAmount').textContent = sign + '$' + Math.abs(plAmount).toFixed(2);
+            document.getElementById('plAmount').style.color = color;
+            document.getElementById('plPercent').textContent = '(' + sign + plPct.toFixed(2) + '%)';
+            document.getElementById('plPercent').style.color = color;
+
+            // Build individual trades list
+            displayIndividualTrades();
+        }
+
+    } catch (error) {
+        console.error('Error loading user trades:', error);
+    }
+}
+
+// Display individual trades breakdown
+function displayIndividualTrades() {
+    if (!userTrades || userTrades.length === 0) return;
+
+    const tradesList = document.getElementById('tradesList');
+    tradesList.innerHTML = '';
+
+    userTrades.forEach((trade, index) => {
+        const plAmount = trade.unrealized_pl;
+        const plPct = trade.unrealized_pl_pct;
+        const color = plAmount >= 0 ? 'var(--success-green)' : 'var(--danger-red)';
+        const sign = plAmount >= 0 ? '+' : '';
+        const date = new Date(trade.timestamp).toLocaleString();
+
+        const tradeHTML = `
+            <div style="background: var(--bg-dark); padding: 0.75rem; border-radius: 4px; border-left: 3px solid ${color};">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">
+                            <i class="fas fa-calendar"></i> ${date}
+                        </div>
+                        <div style="font-size: 0.875rem; font-weight: 600;">
+                            ${trade.shares} shares @ $${trade.purchase_price.toFixed(2)}
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                            Cost: $${trade.purchase_cost.toFixed(2)} → Value: $${trade.current_value.toFixed(2)}
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 1.125rem; font-weight: 700; color: ${color}; font-family: var(--font-mono);">
+                            ${sign}$${Math.abs(plAmount).toFixed(2)}
+                        </div>
+                        <div style="font-size: 0.75rem; font-weight: 600; color: ${color};">
+                            ${sign}${plPct.toFixed(2)}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        tradesList.innerHTML += tradeHTML;
+    });
+}
+
+// Toggle trades breakdown visibility
+function toggleTradesBreakdown() {
+    const breakdown = document.getElementById('tradesBreakdown');
+    const btn = document.getElementById('showTradesBtn');
+
+    if (breakdown.style.display === 'none' || !breakdown.style.display) {
+        breakdown.style.display = 'block';
+        btn.style.display = 'none';
+    } else {
+        breakdown.style.display = 'none';
+        btn.style.display = 'block';
+    }
+}
+
+// Stock Price Chart
+const ctx = document.getElementById('stockChart').getContext('2d');
+let stockChart = null;
+
+function createChart(type) {
+    if (stockChart) {
+        stockChart.destroy();
+    }
+
+    console.log('Creating chart type:', type);
+
+    if (type === 'candlestick' && typeof Chart.controllers.candlestick !== 'undefined') {
+        console.log('Creating candlestick chart');
+        stockChart = new Chart(ctx, {
+            type: 'candlestick',
+            data: {
+                labels: [],  // Will be set when data loads
+                datasets: [
+                    {
+                        label: stockSymbol,
+                        data: [],
+                        borderColor: {
+                            up: '#4a9d7e',
+                            down: '#c74a4a',
+                            unchanged: '#8a8f98'
+                        },
+                        backgroundColor: {
+                            up: 'rgba(74, 157, 126, 0.2)',
+                            down: 'rgba(199, 74, 74, 0.2)',
+                            unchanged: 'rgba(138, 143, 152, 0.2)'
+                        },
+                        order: 2
+                    },
+                    {
+                        type: 'scatter',
+                        label: 'Your Purchases',
+                        data: [],
+                        backgroundColor: '#9b59b6',
+                        borderColor: '#8e44ad',
+                        borderWidth: 2,
+                        pointRadius: 8,
+                        pointHoverRadius: 10,
+                        order: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(10, 14, 20, 0.95)',
+                        padding: 8,
+                        titleColor: '#d4d7dc',
+                        bodyColor: '#d4d7dc',
+                        borderColor: '#1e2329',
+                        borderWidth: 1,
+                        displayColors: false,
+                        titleFont: { size: 11 },
+                        bodyFont: { size: 11 },
+                        callbacks: {
+                            title: function(context) {
+                                // Use the label from the labels array
+                                return chartData && chartData.labels ? chartData.labels[context[0].dataIndex] : '';
+                            },
+                            label: function(context) {
+                                const point = context.raw;
+                                return [
+                                    'Open: $' + point.o.toFixed(2),
+                                    'High: $' + point.h.toFixed(2),
+                                    'Low: $' + point.l.toFixed(2),
+                                    'Close: $' + point.c.toFixed(2)
+                                ];
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: {
+                            color: 'rgba(30, 35, 41, 0.5)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#8a8f98',
+                            font: { size: 10 },
+                            callback: function(value) {
+                                return '$' + value.toFixed(0);
+                            }
+                        }
+                    },
+                    x: {
+                        type: 'linear',  // Use numeric scale for x-axis
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#8a8f98',
+                            font: { size: 10 },
+                            maxTicksLimit: 10,
+                            callback: function(value, index) {
+                                // Show the label from our labels array
+                                if (chartData && chartData.labels && chartData.labels[value]) {
+                                    return chartData.labels[value];
+                                }
+                                return '';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } else {
+        // Line chart (fallback if candlestick not available)
+        if (type === 'candlestick') {
+            console.warn('Candlestick chart not available, using line chart');
+        }
+        console.log('Creating line chart');
+        stockChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: stockSymbol + ' Price',
+                        data: [],
+                        borderColor: '#4a9d7e',
+                        backgroundColor: 'rgba(74, 157, 126, 0.05)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.1,
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
+                        pointBackgroundColor: '#4a9d7e',
+                        pointBorderWidth: 1,
+                        order: 2
+                    },
+                    {
+                        label: 'Your Purchases',
+                        data: [],
+                        backgroundColor: '#9b59b6',
+                        borderColor: '#8e44ad',
+                        borderWidth: 2,
+                        pointRadius: 8,
+                        pointHoverRadius: 10,
+                        pointStyle: 'circle',
+                        showLine: false,
+                        spanGaps: false,  // Don't connect null values
+                        order: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(10, 14, 20, 0.95)',
+                        padding: 8,
+                        titleColor: '#d4d7dc',
+                        bodyColor: '#d4d7dc',
+                        borderColor: '#1e2329',
+                        borderWidth: 1,
+                        displayColors: false,
+                        titleFont: { size: 11 },
+                        bodyFont: { size: 11 },
+                        callbacks: {
+                            label: function(context) {
+                                if (context.datasetIndex === 1 && context.parsed.y) {
+                                    // This is a purchase marker
+                                    const trade = userTrades ? userTrades.find(t => {
+                                        const markers = getPurchaseMarkers(chartData);
+                                        return markers.some(m => m.x === context.dataIndex && Math.abs(m.y - context.parsed.y) < 0.01);
+                                    }) : null;
+
+                                    if (trade) {
+                                        return [
+                                            '🟣 YOUR PURCHASE',
+                                            `Shares: ${trade.shares}`,
+                                            `Price: $${trade.purchase_price.toFixed(2)}`,
+                                            `Date: ${new Date(trade.timestamp).toLocaleDateString()}`
+                                        ];
+                                    }
+                                    return '🟣 Purchase: $' + context.parsed.y.toFixed(2);
+                                }
+                                return '$' + context.parsed.y.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: {
+                            color: 'rgba(30, 35, 41, 0.5)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#8a8f98',
+                            font: { size: 10 },
+                            callback: function(value) {
+                                return '$' + value.toFixed(0);
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#8a8f98',
+                            font: { size: 10 },
+                            maxTicksLimit: 10
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+function setChartType(type) {
+    currentChartType = type;
+
+    // Update button states
+    document.getElementById('btn-line').classList.remove('active');
+    document.getElementById('btn-candlestick').classList.remove('active');
+    document.getElementById('btn-' + type).classList.add('active');
+
+    // Recreate chart with cached data
+    createChart(type);
+    if (chartData) {
+        updateChartData(chartData);
+    }
+}
+
+function updateChartData(data) {
+    console.log('Updating chart with type:', currentChartType);
+    console.log('Chart object:', stockChart);
+
+    try {
+        if (currentChartType === 'candlestick') {
+            console.log('Setting candlestick data, items:', data.ohlc ? data.ohlc.length : 0);
+            stockChart.data.labels = data.labels || [];  // Set labels for the x-axis
+            stockChart.data.datasets[0].data = data.ohlc || [];
+            console.log('First few OHLC items:', data.ohlc ? data.ohlc.slice(0, 3) : []);
+
+            // Add purchase markers (scatter points)
+            stockChart.data.datasets[1].data = getPurchaseMarkers(data);
+        } else {
+            console.log('Setting line chart data, labels:', data.labels ? data.labels.length : 0, 'prices:', data.prices ? data.prices.length : 0);
+            stockChart.data.labels = data.labels || [];
+            stockChart.data.datasets[0].data = data.prices || [];
+
+            // Change color based on trend
+            if (data.prices && data.prices.length > 0) {
+                const firstPrice = data.prices[0];
+                const lastPrice = data.prices[data.prices.length - 1];
+                const isPositive = lastPrice >= firstPrice;
+
+                stockChart.data.datasets[0].borderColor = isPositive ? '#4a9d7e' : '#c74a4a';
+                stockChart.data.datasets[0].backgroundColor = isPositive ?
+                    'rgba(74, 157, 126, 0.05)' : 'rgba(199, 74, 74, 0.05)';
+                stockChart.data.datasets[0].pointBackgroundColor = isPositive ? '#4a9d7e' : '#c74a4a';
+            }
+
+            // Add purchase markers for line chart
+            // Convert {x, y} format to sparse array format for the line chart
+            const markers = getPurchaseMarkers(data);
+            const sparseMarkers = new Array(data.labels.length).fill(null);
+            markers.forEach(marker => {
+                if (marker.x >= 0 && marker.x < sparseMarkers.length) {
+                    sparseMarkers[marker.x] = marker.y;
+                }
+            });
+            stockChart.data.datasets[1].data = sparseMarkers;
+        }
+        console.log('Updating chart...');
+        stockChart.update();
+        console.log('Chart updated successfully');
+    } catch (error) {
+        console.error('Error updating chart data:', error);
+        throw error;
+    }
+}
+
+// Get purchase markers to overlay on the chart
+function getPurchaseMarkers(data) {
+    if (!userTrades || userTrades.length === 0 || !data.labels) {
+        return [];
+    }
+
+    const markers = [];
+
+    console.log('Creating purchase markers for', userTrades.length, 'trades');
+    console.log('Chart period:', currentPeriod);
+    console.log('Chart has', data.labels.length, 'data points');
+
+    // Check if we have timestamps from the backend
+    if (!data.timestamps || data.timestamps.length === 0) {
+        console.warn('No timestamps available from backend, markers may be inaccurate');
+        return markers;
+    }
+
+    // For each trade, find the closest matching data point using actual timestamps
+    userTrades.forEach((trade, tradeIdx) => {
+        const tradeDate = new Date(trade.timestamp);
+        const tradeTimestamp = tradeDate.getTime();
+
+        console.log(`Trade ${tradeIdx + 1}: ${tradeDate.toLocaleString()}, ${trade.shares} shares @ $${trade.purchase_price}`);
+
+        let closestIndex = -1;
+        let closestDiff = Infinity;
+
+        // Find the data point with the closest timestamp
+        data.timestamps.forEach((timestamp, index) => {
+            const dataPointDate = new Date(timestamp);
+            const dataPointTimestamp = dataPointDate.getTime();
+
+            // Calculate time difference in milliseconds
+            const diff = Math.abs(dataPointTimestamp - tradeTimestamp);
+
+            if (diff < closestDiff) {
+                closestDiff = diff;
+                closestIndex = index;
+            }
+        });
+
+        if (closestIndex !== -1) {
+            const closestDate = new Date(data.timestamps[closestIndex]);
+            const daysDiff = Math.abs(closestDate - tradeDate) / (1000 * 60 * 60 * 24);
+
+            console.log(`  → Closest data point: index ${closestIndex}, label: ${data.labels[closestIndex]}, date: ${closestDate.toLocaleString()}, diff: ${daysDiff.toFixed(1)} days`);
+
+            // Only show marker if it's reasonably close to a data point on the chart
+            // For 1D chart, must be within 1 day; for 5D within 5 days, etc.
+            let maxDaysDiff;
+            if (currentPeriod === '1D') maxDaysDiff = 1;
+            else if (currentPeriod === '5D') maxDaysDiff = 5;
+            else if (currentPeriod === '1M') maxDaysDiff = 35;
+            else if (currentPeriod === '3M') maxDaysDiff = 100;
+            else if (currentPeriod === '6M') maxDaysDiff = 190;
+            else if (currentPeriod === '1Y') maxDaysDiff = 380;
+            else maxDaysDiff = 10000; // 5Y, MAX - show all
+
+            if (daysDiff <= maxDaysDiff) {
+                if (currentChartType === 'candlestick') {
+                    // For candlestick charts
+                    markers.push({
+                        x: closestIndex,
+                        y: trade.purchase_price  // Show at the actual purchase price
+                    });
+                } else {
+                    // For line charts
+                    markers.push({
+                        x: closestIndex,
+                        y: trade.purchase_price  // Show at the actual purchase price
+                    });
+                }
+                console.log(`  ✅ Marker added (within ${maxDaysDiff} day threshold)`);
+            } else {
+                console.log(`  ❌ Marker skipped (${daysDiff.toFixed(1)} days exceeds ${maxDaysDiff} day threshold for ${currentPeriod})`);
+            }
+        }
+    });
+
+    console.log('Final purchase markers:', markers);
+
+    // Show info message about visible/hidden markers
+    const infoDiv = document.getElementById('purchaseMarkerInfo');
+    const infoText = document.getElementById('purchaseMarkerText');
+
+    if (userTrades && userTrades.length > 0) {
+        const visibleCount = markers.length;
+        const totalCount = userTrades.length;
+
+        if (visibleCount === 0 && totalCount > 0) {
+            infoDiv.style.display = 'block';
+            infoText.innerHTML = `🟣 You have ${totalCount} purchase${totalCount > 1 ? 's' : ''} for this stock, but ${totalCount > 1 ? 'they are' : 'it is'} not visible on this timeframe. Try viewing <strong>1M</strong>, <strong>3M</strong>, or <strong>1Y</strong> chart to see your purchases.`;
+        } else if (visibleCount < totalCount) {
+            infoDiv.style.display = 'block';
+            infoText.innerHTML = `🟣 Showing ${visibleCount} of ${totalCount} purchase${totalCount > 1 ? 's' : ''}. Some purchases are outside this timeframe.`;
+        } else if (visibleCount > 0) {
+            infoDiv.style.display = 'block';
+            infoText.innerHTML = `🟣 Showing all ${visibleCount} purchase${visibleCount > 1 ? 's' : ''} as purple dots on the chart.`;
+        } else {
+            infoDiv.style.display = 'none';
+        }
+    }
+
+    return markers;
+}
+
+// Fetch REAL stock data from yfinance via our API
+async function updateStockChart(period) {
+    currentPeriod = period;
+
+    console.log('Fetching data for period:', period);
+
+    // Update button states
+    document.querySelectorAll('#btn-1D, #btn-5D, #btn-1M, #btn-3M, #btn-6M, #btn-1Y, #btn-5Y, #btn-MAX').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.getElementById('btn-' + period).classList.add('active');
+
+    // Show loading
+    document.getElementById('loadingSpinner').style.display = 'block';
+
+    try {
+        // Fetch real data from our backend API
+        const response = await fetch(`/api/stock-history/${stockSymbol}/${period}`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Received data:', data);
+        console.log('Data keys:', Object.keys(data));
+        console.log('Labels:', data.labels ? data.labels.length : 'none');
+        console.log('Prices:', data.prices ? data.prices.length : 'none');
+        console.log('OHLC:', data.ohlc ? data.ohlc.length : 'none');
+        console.log('Timestamps:', data.timestamps ? data.timestamps.length : 'none');
+
+        if (data.ohlc && data.ohlc.length > 0) {
+            console.log('First OHLC item:', data.ohlc[0]);
+        }
+
+        if (data.timestamps && data.timestamps.length > 0) {
+            console.log('First timestamp:', data.timestamps[0]);
+            console.log('Last timestamp:', data.timestamps[data.timestamps.length - 1]);
+        }
+
+        if (data.error) {
+            console.error('API error:', data.error);
+            alert('Error loading chart data: ' + data.error);
+            document.getElementById('loadingSpinner').style.display = 'none';
+            return;
+        }
+
+        if (!data.labels || data.labels.length === 0) {
+            console.error('No data labels received');
+            alert('No data available for this period');
+            document.getElementById('loadingSpinner').style.display = 'none';
+            return;
+        }
+
+        chartData = data;
+        updateChartData(data);
+
+    } catch (error) {
+        console.error('Error loading chart:', error);
+        alert('Failed to load chart data. Check console for details.');
+    } finally {
+        document.getElementById('loadingSpinner').style.display = 'none';
+    }
+}
+
+// Fetch and display news
+async function loadNews() {
+    console.log('Loading news for:', stockSymbol);
+
+    try {
+        const response = await fetch(`/api/stock-news/${stockSymbol}`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Received news:', data);
+
+        const newsContainer = document.getElementById('newsContainer');
+
+        if (data.error || !data.news || data.news.length === 0) {
+            newsContainer.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 1rem;">No news available</div>';
+            return;
+        }
+
+        // Display news items
+        let newsHTML = '<div style="display: flex; flex-direction: column; gap: 1rem;">';
+
+        data.news.forEach(item => {
+            const date = new Date(item.published * 1000).toLocaleDateString();
+            newsHTML += `
+                <div style="display: flex; gap: 1rem; padding: 0.75rem; background: var(--bg-dark); border-radius: 4px; border-left: 3px solid var(--primary-blue);">
+                    ${item.thumbnail ? `<img src="${item.thumbnail}" style="width: 80px; height: 60px; object-fit: cover; border-radius: 3px;" alt="thumbnail">` : ''}
+                    <div style="flex: 1;">
+                        <a href="${item.link}" target="_blank" style="color: var(--text-primary); text-decoration: none; font-weight: 500; font-size: 0.95rem; display: block; margin-bottom: 0.25rem;">
+                            ${item.title}
+                        </a>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">
+                            ${item.publisher} • ${date}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        newsHTML += '</div>';
+        newsContainer.innerHTML = newsHTML;
+
+    } catch (error) {
+        console.error('Error loading news:', error);
+        document.getElementById('newsContainer').innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 1rem;">Error loading news</div>';
+    }
+}
+
+// Initialize when page is fully loaded
+window.addEventListener('load', async function() {
+    console.log('=== Page loaded ===');
+    console.log('Chart.js version:', Chart.version);
+    console.log('Candlestick controller available:', typeof Chart.controllers.candlestick !== 'undefined');
+    console.log('Stock symbol:', stockSymbol);
+    console.log('Initializing charts and news...');
+
+    try {
+        // Load user trades first so we can show them on the chart
+        await loadUserTrades();
+
+        createChart(currentChartType);
+        updateStockChart('1D');
+        loadNews();
+    } catch (error) {
+        console.error('Error during initialization:', error);
+        alert('Error initializing charts: ' + error.message);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,486 @@
+{% extends "layout_new.html" %}
+
+{% block title %}Learn Trading{% endblock %}
+
+{% block main %}
+<div class="fade-in">
+    <!-- Header -->
+    <div style="margin: 1.5rem 0;">
+        <h1 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem;">
+            Learn Trading
+        </h1>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+            Educational guides and strategies
+        </p>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="card" style="background: linear-gradient(135deg, var(--primary-blue) 0%, var(--success-green) 100%); border: none; color: white;">
+        <div class="card-header" style="color: white;">
+            <i class="fas fa-book"></i> What You'll Learn
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+            <div style="padding: 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 0.5rem;">
+                <i class="fas fa-chart-line" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Market Basics</h3>
+                <p style="font-size: 0.875rem; opacity: 0.9;">Understand stocks, markets, and trading fundamentals</p>
+            </div>
+            <div style="padding: 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 0.5rem;">
+                <i class="fas fa-project-diagram" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Pattern Recognition</h3>
+                <p style="font-size: 0.875rem; opacity: 0.9;">Identify bullish and bearish patterns</p>
+            </div>
+            <div style="padding: 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 0.5rem;">
+                <i class="fas fa-shield-alt" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Risk Management</h3>
+                <p style="font-size: 0.875rem; opacity: 0.9;">Learn to protect your portfolio with hedging strategies</p>
+            </div>
+            <div style="padding: 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 0.5rem;">
+                <i class="fas fa-calculator" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">Advanced Trading</h3>
+                <p style="font-size: 0.875rem; opacity: 0.9;">Options, derivatives, and complex strategies</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 1: Bulls vs Bears -->
+    <div class="card education-card" id="bulls-bears">
+        <div class="card-header">
+            <i class="fas fa-balance-scale"></i> Bulls vs Bears: The Market Forces
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">
+                <span style="color: var(--success-green);">🐂 Bulls</span> vs
+                <span style="color: var(--danger-red);">🐻 Bears</span>
+            </h3>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                <!-- Bulls -->
+                <div style="background: rgba(16, 185, 129, 0.1); padding: 1.5rem; border-radius: 0.5rem; border-left: 4px solid var(--success-green);">
+                    <h4 style="color: var(--success-green); font-size: 1.25rem; margin-bottom: 1rem;">
+                        <i class="fas fa-arrow-up"></i> Bullish Market (Bull)
+                    </h4>
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        A <span class="concept-highlight">bull market</span> is characterized by rising prices and investor optimism.
+                        Bulls believe prices will continue to rise.
+                    </p>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <i class="fas fa-check" style="color: var(--success-green);"></i>
+                            <strong>Optimistic</strong> - Confidence in growth
+                        </li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <i class="fas fa-check" style="color: var(--success-green);"></i>
+                            <strong>Buying Pressure</strong> - High demand for stocks
+                        </li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <i class="fas fa-check" style="color: var(--success-green);"></i>
+                            <strong>Rising Prices</strong> - Upward trend in market
+                        </li>
+                        <li style="padding: 0.5rem 0;">
+                            <i class="fas fa-check" style="color: var(--success-green);"></i>
+                            <strong>Strong Economy</strong> - Positive economic indicators
+                        </li>
+                    </ul>
+                    <div class="pattern-example" style="margin-top: 1rem;">
+                        <strong>Bull Strategy:</strong> Buy low, hold positions, ride the uptrend
+                    </div>
+                </div>
+
+                <!-- Bears -->
+                <div style="background: rgba(239, 68, 68, 0.1); padding: 1.5rem; border-radius: 0.5rem; border-left: 4px solid var(--danger-red);">
+                    <h4 style="color: var(--danger-red); font-size: 1.25rem; margin-bottom: 1rem;">
+                        <i class="fas fa-arrow-down"></i> Bearish Market (Bear)
+                    </h4>
+                    <p style="margin-bottom: 1rem; line-height: 1.8;">
+                        A <span class="concept-highlight">bear market</span> is characterized by falling prices and investor pessimism.
+                        Bears believe prices will continue to fall.
+                    </p>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <i class="fas fa-times" style="color: var(--danger-red);"></i>
+                            <strong>Pessimistic</strong> - Fear of losses
+                        </li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <i class="fas fa-times" style="color: var(--danger-red);"></i>
+                            <strong>Selling Pressure</strong> - High supply of stocks
+                        </li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <i class="fas fa-times" style="color: var(--danger-red);"></i>
+                            <strong>Falling Prices</strong> - Downward trend in market
+                        </li>
+                        <li style="padding: 0.5rem 0;">
+                            <i class="fas fa-times" style="color: var(--danger-red);"></i>
+                            <strong>Weak Economy</strong> - Negative economic indicators
+                        </li>
+                    </ul>
+                    <div class="pattern-example" style="margin-top: 1rem;">
+                        <strong>Bear Strategy:</strong> Sell high, wait for bottom, protect capital
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info" style="margin-top: 1.5rem;">
+                <i class="fas fa-info-circle"></i>
+                <strong>Why Bulls & Bears?</strong> Bulls thrust their horns upward (rising markets), while bears swipe their paws downward (falling markets).
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Chart Patterns -->
+    <div class="card education-card" id="patterns">
+        <div class="card-header">
+            <i class="fas fa-chart-bar"></i> Recognizing Chart Patterns
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+            <p style="font-size: 1.125rem; line-height: 1.8; margin-bottom: 1.5rem;">
+                Chart patterns help traders predict future price movements by analyzing historical price action.
+                Here are the most important patterns every trader should know:
+            </p>
+
+            <!-- Bullish Patterns -->
+            <h3 style="color: var(--success-green); margin-bottom: 1rem;">
+                <i class="fas fa-arrow-trend-up"></i> Bullish Patterns (Prices Expected to Rise)
+            </h3>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="pattern-example">
+                    <h4 style="color: var(--success-green); margin-bottom: 0.5rem;">📈 Head and Shoulders (Inverse)</h4>
+                    <p style="font-size: 0.875rem; margin-bottom: 0.5rem;">A reversal pattern signaling an uptrend</p>
+                    <pre style="color: var(--success-green); font-size: 0.75rem;">
+    /\    /\    /\
+   /  \  /  \  /  \
+  /    \/    \/    \</pre>
+                </div>
+
+                <div class="pattern-example">
+                    <h4 style="color: var(--success-green); margin-bottom: 0.5rem;">📊 Double Bottom</h4>
+                    <p style="font-size: 0.875rem; margin-bottom: 0.5rem;">Two lows at similar levels, then breakout up</p>
+                    <pre style="color: var(--success-green); font-size: 0.75rem;">
+         /\
+    /\  /  \
+   /  \/    \
+  /          \</pre>
+                </div>
+
+                <div class="pattern-example">
+                    <h4 style="color: var(--success-green); margin-bottom: 0.5rem;">🔺 Ascending Triangle</h4>
+                    <p style="font-size: 0.875rem; margin-bottom: 0.5rem;">Higher lows with resistance at same level</p>
+                    <pre style="color: var(--success-green); font-size: 0.75rem;">
+  ___________
+   /\  /\  /
+  /  \/  \/</pre>
+                </div>
+            </div>
+
+            <!-- Bearish Patterns -->
+            <h3 style="color: var(--danger-red); margin-bottom: 1rem;">
+                <i class="fas fa-arrow-trend-down"></i> Bearish Patterns (Prices Expected to Fall)
+            </h3>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div class="pattern-example">
+                    <h4 style="color: var(--danger-red); margin-bottom: 0.5rem;">📉 Head and Shoulders</h4>
+                    <p style="font-size: 0.875rem; margin-bottom: 0.5rem;">Classic reversal indicating downtrend</p>
+                    <pre style="color: var(--danger-red); font-size: 0.75rem;">
+  /\    /\    /\
+ /  \  /  \  /  \
+/    \/    \/    \</pre>
+                </div>
+
+                <div class="pattern-example">
+                    <h4 style="color: var(--danger-red); margin-bottom: 0.5rem;">📊 Double Top</h4>
+                    <p style="font-size: 0.875rem; margin-bottom: 0.5rem;">Two peaks at similar levels, then breakdown</p>
+                    <pre style="color: var(--danger-red); font-size: 0.75rem;">
+  /\      /\
+ /  \    /  \
+/    \  /    \
+      \/      \</pre>
+                </div>
+
+                <div class="pattern-example">
+                    <h4 style="color: var(--danger-red); margin-bottom: 0.5rem;">🔻 Descending Triangle</h4>
+                    <p style="font-size: 0.875rem; margin-bottom: 0.5rem;">Lower highs with support at same level</p>
+                    <pre style="color: var(--danger-red); font-size: 0.75rem;">
+\  /\  /\
+ \/  \/  \
+__________</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Options & Derivatives -->
+    <div class="card education-card" id="options">
+        <div class="card-header">
+            <i class="fas fa-layer-group"></i> Options & Derivatives
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+            <p style="font-size: 1.125rem; line-height: 1.8; margin-bottom: 1.5rem;">
+                Options and derivatives are financial contracts that derive their value from an underlying asset.
+                They're powerful tools for hedging and speculation.
+            </p>
+
+            <!-- Call Options -->
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--success-green);">
+                <h3 style="color: var(--success-green); margin-bottom: 1rem;">
+                    <i class="fas fa-phone"></i> Call Options
+                </h3>
+                <p style="margin-bottom: 1rem; line-height: 1.8;">
+                    A <span class="concept-highlight">call option</span> gives you the RIGHT (but not obligation) to
+                    BUY a stock at a specific price (strike price) by a specific date (expiration).
+                </p>
+                <div class="pattern-example">
+                    <strong>Example:</strong><br>
+                    Stock XYZ is at $100. You buy a call option with:
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                        <li>Strike Price: $105</li>
+                        <li>Expiration: 30 days</li>
+                        <li>Premium: $3 per share</li>
+                    </ul>
+                    <strong>If stock rises to $115:</strong> Profit! Exercise option, buy at $105, sell at $115<br>
+                    <strong>If stock stays at $100:</strong> Let option expire, lose $3 premium
+                </div>
+                <p style="margin-top: 1rem;"><strong>When to use:</strong> You expect the stock price to RISE</p>
+            </div>
+
+            <!-- Put Options -->
+            <div style="background: rgba(239, 68, 68, 0.1); padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--danger-red);">
+                <h3 style="color: var(--danger-red); margin-bottom: 1rem;">
+                    <i class="fas fa-hand-paper"></i> Put Options
+                </h3>
+                <p style="margin-bottom: 1rem; line-height: 1.8;">
+                    A <span class="concept-highlight">put option</span> gives you the RIGHT (but not obligation) to
+                    SELL a stock at a specific price (strike price) by a specific date (expiration).
+                </p>
+                <div class="pattern-example">
+                    <strong>Example:</strong><br>
+                    Stock XYZ is at $100. You buy a put option with:
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                        <li>Strike Price: $95</li>
+                        <li>Expiration: 30 days</li>
+                        <li>Premium: $3 per share</li>
+                    </ul>
+                    <strong>If stock falls to $85:</strong> Profit! Buy at $85, exercise option to sell at $95<br>
+                    <strong>If stock stays at $100:</strong> Let option expire, lose $3 premium
+                </div>
+                <p style="margin-top: 1rem;"><strong>When to use:</strong> You expect the stock price to FALL</p>
+            </div>
+
+            <!-- Option Pricing -->
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem;">
+                <i class="fas fa-calculator"></i> What Affects Option Pricing?
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <div style="padding: 1rem; background: var(--bg-dark); border-radius: 0.5rem;">
+                    <strong style="color: var(--primary-blue);">Stock Price</strong><br>
+                    <span style="font-size: 0.875rem;">Higher stock price = higher call value, lower put value</span>
+                </div>
+                <div style="padding: 1rem; background: var(--bg-dark); border-radius: 0.5rem;">
+                    <strong style="color: var(--primary-blue);">Time to Expiration</strong><br>
+                    <span style="font-size: 0.875rem;">More time = more valuable (time value decays)</span>
+                </div>
+                <div style="padding: 1rem; background: var(--bg-dark); border-radius: 0.5rem;">
+                    <strong style="color: var(--primary-blue);">Volatility</strong><br>
+                    <span style="font-size: 0.875rem;">Higher volatility = higher option prices</span>
+                </div>
+                <div style="padding: 1rem; background: var(--bg-dark); border-radius: 0.5rem;">
+                    <strong style="color: var(--primary-blue);">Strike Price</strong><br>
+                    <span style="font-size: 0.875rem;">Difference from current price affects value</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 4: ETFs & Portfolio Management -->
+    <div class="card education-card" id="etfs">
+        <div class="card-header">
+            <i class="fas fa-box"></i> ETFs & Portfolio Diversification
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">
+                <i class="fas fa-cubes"></i> What are ETFs?
+            </h3>
+            <p style="font-size: 1.125rem; line-height: 1.8; margin-bottom: 1.5rem;">
+                An <span class="concept-highlight">ETF (Exchange-Traded Fund)</span> is a basket of stocks that trades like a single stock.
+                It's an easy way to diversify your portfolio with one purchase!
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                <div style="background: var(--bg-dark); padding: 1.5rem; border-radius: 0.5rem;">
+                    <h4 style="color: var(--primary-blue); margin-bottom: 1rem;">
+                        <i class="fas fa-globe"></i> Popular ETF Types
+                    </h4>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <strong>SPY</strong> - Tracks S&P 500 (top 500 US companies)
+                        </li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <strong>QQQ</strong> - Tracks Nasdaq 100 (tech stocks)
+                        </li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <strong>VTI</strong> - Total US stock market
+                        </li>
+                        <li style="padding: 0.5rem 0;">
+                            <strong>VXUS</strong> - International stocks
+                        </li>
+                    </ul>
+                </div>
+
+                <div style="background: var(--bg-dark); padding: 1.5rem; border-radius: 0.5rem;">
+                    <h4 style="color: var(--success-green); margin-bottom: 1rem;">
+                        <i class="fas fa-check-circle"></i> Benefits of ETFs
+                    </h4>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <i class="fas fa-check" style="color: var(--success-green);"></i>
+                            Instant diversification
+                        </li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <i class="fas fa-check" style="color: var(--success-green);"></i>
+                            Lower risk than individual stocks
+                        </li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <i class="fas fa-check" style="color: var(--success-green);"></i>
+                            Lower fees than mutual funds
+                        </li>
+                        <li style="padding: 0.5rem 0;">
+                            <i class="fas fa-check" style="color: var(--success-green);"></i>
+                            Easy to buy and sell
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem;">
+                <i class="fas fa-shield-alt"></i> Hedging Your Portfolio
+            </h3>
+            <p style="line-height: 1.8; margin-bottom: 1rem;">
+                <span class="concept-highlight">Hedging</span> is like buying insurance for your investments.
+                You take positions that will profit if your main investments lose value.
+            </p>
+
+            <div class="pattern-example">
+                <strong>Hedging Example:</strong><br><br>
+                <strong>Scenario:</strong> You own $10,000 worth of tech stocks, but worried about a market crash.<br><br>
+                <strong>Hedge Strategy:</strong> Buy put options on a tech ETF (like QQQ)<br>
+                • If market crashes → your stocks fall, but puts gain value ✓<br>
+                • If market rises → your stocks gain, puts expire worthless (small loss on premium)<br><br>
+                <strong>Result:</strong> Protected downside while keeping upside potential!
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem;">
+                <i class="fas fa-pie-chart"></i> Portfolio Allocation Strategies
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                <div style="padding: 1.5rem; background: var(--bg-dark); border-radius: 0.5rem; border-left: 4px solid var(--primary-blue);">
+                    <h4 style="color: var(--primary-blue); margin-bottom: 1rem;">Conservative (Low Risk)</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        <li>70% Bonds/Fixed Income</li>
+                        <li>20% Large-Cap Stocks</li>
+                        <li>10% Cash</li>
+                    </ul>
+                    <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                        Best for: Preserving capital, near retirement
+                    </p>
+                </div>
+
+                <div style="padding: 1.5rem; background: var(--bg-dark); border-radius: 0.5rem; border-left: 4px solid var(--warning-yellow);">
+                    <h4 style="color: var(--warning-yellow); margin-bottom: 1rem;">Moderate (Balanced)</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        <li>40% Bonds</li>
+                        <li>50% Stocks (various sectors)</li>
+                        <li>10% Alternative/Cash</li>
+                    </ul>
+                    <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                        Best for: Long-term growth with some safety
+                    </p>
+                </div>
+
+                <div style="padding: 1.5rem; background: var(--bg-dark); border-radius: 0.5rem; border-left: 4px solid var(--danger-red);">
+                    <h4 style="color: var(--danger-red); margin-bottom: 1rem;">Aggressive (High Risk)</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        <li>80% Stocks (growth & value)</li>
+                        <li>10% Small-Cap/International</li>
+                        <li>10% Alternative Investments</li>
+                    </ul>
+                    <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                        Best for: Young investors, high risk tolerance
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 5: Trading Fees -->
+    <div class="card education-card" id="fees">
+        <div class="card-header">
+            <i class="fas fa-money-bill-wave"></i> Understanding Trading Fees
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+            <p style="font-size: 1.125rem; line-height: 1.8; margin-bottom: 1.5rem;">
+                In real-world trading, every transaction comes with costs. On TradeWise, we simulate this
+                to teach you about the impact of fees on your returns.
+            </p>
+
+            <div class="alert alert-info">
+                <i class="fas fa-gift"></i>
+                <strong>TradeWise Beginner Bonus:</strong> Your first <span class="concept-highlight">5 trades are FREE</span>
+                to help you get started! After that, a small ${{ fee_amount if fee_amount is defined else '5.00' }} fee applies per trade.
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <h4 style="margin-bottom: 1rem;">Why Fees Matter:</h4>
+                <div class="pattern-example">
+                    <strong>Example: Day Trading with Fees</strong><br><br>
+                    You make 10 trades per day at $5 per trade = $50 in fees<br>
+                    Over a month (20 trading days) = $1,000 in fees!<br><br>
+                    <strong>Your portfolio must gain MORE than $1,000 just to break even!</strong><br><br>
+                    <span style="color: var(--warning-yellow);">
+                        ⚠️ This is why frequent trading can hurt your returns!
+                    </span>
+                </div>
+            </div>
+
+            <h4 style="margin-top: 2rem; margin-bottom: 1rem;">Types of Trading Costs:</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <div style="padding: 1rem; background: var(--bg-dark); border-radius: 0.5rem;">
+                    <strong style="color: var(--primary-blue);">Commission</strong><br>
+                    <span style="font-size: 0.875rem;">Fee per trade ($0-$10 typically)</span>
+                </div>
+                <div style="padding: 1rem; background: var(--bg-dark); border-radius: 0.5rem;">
+                    <strong style="color: var(--primary-blue);">Spread</strong><br>
+                    <span style="font-size: 0.875rem;">Difference between buy and sell price</span>
+                </div>
+                <div style="padding: 1rem; background: var(--bg-dark); border-radius: 0.5rem;">
+                    <strong style="color: var(--primary-blue);">Slippage</strong><br>
+                    <span style="font-size: 0.875rem;">Price changes between order and execution</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="card" style="text-align: center; padding: 3rem; background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-dark) 100%);">
+        <h2 style="font-size: 2rem; margin-bottom: 1rem;">
+            <i class="fas fa-rocket"></i> Ready to Put Your Knowledge to Practice?
+        </h2>
+        <p style="color: var(--text-secondary); font-size: 1.125rem; margin-bottom: 2rem;">
+            Now that you understand the fundamentals, start trading on TradeWise and apply what you've learned!
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="/quote" class="btn btn-success" style="font-size: 1.125rem;">
+                <i class="fas fa-chart-line"></i> Start Trading
+            </a>
+            <a href="/index" class="btn btn-primary" style="font-size: 1.125rem;">
+                <i class="fas fa-home"></i> View Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
